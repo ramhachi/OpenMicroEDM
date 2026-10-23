@@ -1,0 +1,14 @@
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+build/
+dist/
+*.log
+*.tmp
+# Generated CAD / mesh artifacts should be committed only when intentionally released
+*.stl~
+*.step~
+*.FCStd1
