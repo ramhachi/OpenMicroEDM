@@ -2,7 +2,7 @@
 
 ## Philosophy
 
-The project is only interesting if the low-cost architecture survives measurement. Every claim should be tied to an independent observation rather than inferred from motor steps or CAD dimensions.
+The project is only interesting if the low-cost architecture survives measurement. Every claim should be tied to an independent observation rather than inferred from motor steps, pixel size, or CAD dimensions.
 
 ## E000 — Fine-stage repeatability
 
@@ -35,6 +35,96 @@ Compare fine-stage output with:
 - combined spindle + fluid.
 
 Use the same external displacement measurement as E000.
+
+## E005 — Static vision repeatability
+
+Question: what is the noise floor of the camera + optics + illumination + localization algorithm without any machine motion?
+
+Procedure:
+- acquire at least 100 images of the same fiducial;
+- keep motion stages fixed;
+- log camera settings and temperature;
+- estimate XY and rotation for every frame.
+
+Report:
+- apparent XY standard deviation and peak-to-peak variation in µm;
+- rotation variation;
+- dependence on exposure / illumination / focus;
+- outlier rate and failure-detection behavior.
+
+This experiment establishes the optical-metrology floor before stage errors are introduced.
+
+## E006 — Vision scale / fine-stage calibration
+
+Question: can image-estimated motion reproduce independently measured fine-stage displacement?
+
+Procedure:
+- apply calibrated small XY motions across the fine-stage workspace;
+- image the same reference after each move;
+- compare image-estimated displacement with independent displacement measurement where available;
+- approach points from multiple directions.
+
+Measure:
+- pixel scale;
+- distortion residual;
+- XY orthogonality;
+- cross-axis coupling;
+- subpixel estimator bias;
+- hysteresis;
+- field-position dependence.
+
+## E007 — Macro leave-and-return local registration
+
+Question: can the machine abandon global absolute accuracy and recover the local frame optically?
+
+Procedure:
+1. establish a reference image / local frame;
+2. move the macro stage away by a large randomized displacement;
+3. return using only coarse motion;
+4. reacquire the local fiducial or intrinsic feature;
+5. estimate XY-theta residual with vision;
+6. correct using fine XY;
+7. acquire a verification image;
+8. repeat at least 100 times with randomized approach directions.
+
+Primary outputs:
+- pre-correction coarse landing error;
+- fine-stage correction magnitude;
+- post-correction residual distribution;
+- RMS / 95th-percentile / worst-case error;
+- residual versus temperature, time, and approach direction.
+
+Initial research target: final local XY residual on the order of 1 µm. This is a validation target, not a current claim.
+
+## E008 — Tool-to-fiducial registration
+
+Question: does the optical residual remain small when referenced to the actual electrode tool-center point rather than the image center?
+
+Preferred method: observe electrode tip and fiducial in the same optical frame.
+
+Fallback: use a calibrated camera-to-tool transform and verify it periodically.
+
+Measure:
+- camera-to-tool offset repeatability;
+- drift after spindle operation / thermal cycling;
+- sensitivity to tool replacement / electrode wear;
+- final tool-to-fiducial residual.
+
+This is the machining-relevant vision gate.
+
+## E009 — Tile-to-tile stitching
+
+Question: can overlapping local workspaces be registered without unacceptable accumulated error?
+
+Procedure:
+- define adjacent tiles with shared fiducials or intrinsic features;
+- estimate the transform between each pair;
+- propagate across multiple tiles;
+- independently measure closure error where possible.
+
+Report both local pairwise residual and accumulated global drift.
+
+See [`vision-registration.md`](vision-registration.md) for the metrology architecture.
 
 ## E010 — Gap-signal acquisition
 
@@ -104,17 +194,10 @@ Candidate methods:
 - electrical contact/reference routine outside the machining region;
 - model-based estimate corrected by periodic measurement.
 
-## E040 — Local-coordinate stitching
+## E040 — Integrated local-coordinate machining
 
-Only after fine XY milling works.
+Only after fine XY milling and E005–E009 work.
 
-Question: can a coarse stage reposition to a new tile and recover a local micron-scale coordinate frame?
+Question: can a coarse stage reposition to a new tile, recover a local micron-scale coordinate frame, correct with fine XY, and machine a feature whose placement error is consistent with the measured registration uncertainty?
 
-Procedure:
-- machine or mount fiducials;
-- move macro stage away and back;
-- measure apparent offset with camera/metrology;
-- use fine XY to correct;
-- repeat across widely separated macro positions.
-
-Success is local registration within fine-stage capture range with quantified residual error. It is not proof of global macro-stage accuracy.
+Success is local registration and machining within a quantified tool-relevant error budget. It is not proof of global macro-stage accuracy.
