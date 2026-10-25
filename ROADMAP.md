@@ -4,9 +4,11 @@ This roadmap is deliberately gated by evidence. Scaling the workspace is deferre
 
 ## M0 — Architecture freeze
 
-- [x] Separate macro motion, fine motion, and gap servo conceptually.
+- [x] Separate macro motion, optical registration, fine motion, and gap servo conceptually.
 - [x] Define EDM drilling as the first material-removal test.
+- [x] Define vision-referenced local registration as a core enabling subsystem.
 - [ ] Select independent displacement measurement method for fine-stage validation.
+- [ ] Select first optical configuration and fiducial family for registration tests.
 - [ ] Select first electrode diameter range and workpiece coupon.
 - [ ] Define the first dielectric/flushing arrangement.
 
@@ -59,10 +61,32 @@ Exit criterion: identify a stable operating window and document uncertainty.
 
 Exit criterion: dimensional error is explainable by measured positioning, gap, and wear terms.
 
+## M5V — Vision-referenced local registration
+
+This milestone is the key enabler for large-workspace scaling.
+
+- [ ] Select microscope / camera / illumination architecture.
+- [ ] Compare fiducial geometries and intrinsic-feature registration.
+- [ ] Implement distortion and pixel-scale calibration.
+- [ ] Implement coarse detection + subpixel XY-theta refinement.
+- [ ] Calibrate camera-to-fine-stage transform.
+- [ ] Calibrate and periodically verify tool-center-point offset.
+- [ ] Run static image repeatability test (V000).
+- [ ] Run calibrated fine-stage motion test (V001).
+- [ ] Run randomized macro leave-and-return test (V002).
+- [ ] Run tool-to-fiducial residual test (V003).
+- [ ] Build an explicit uncertainty budget including focus, illumination, thermal drift, distortion, cross-axis error, and camera/tool offset.
+
+Initial research target: repeated local registration with a final tool-relevant XY residual on the order of 1 µm. This is a validation target, not a current claim.
+
+Exit criterion: after randomized coarse repositioning, optical registration plus fine-stage correction produces a documented, repeatable local residual small enough for the intended micro-EDM feature scale.
+
+See [`docs/vision-registration.md`](docs/vision-registration.md).
+
 ## M6 — Macro/micro hybridization
 
 - [ ] Add coarse XY platform.
-- [ ] Implement local fiducial registration.
+- [ ] Integrate the validated vision-registration pipeline.
 - [ ] Implement tile overlap and stitching calibration.
 - [ ] Demonstrate local micro-machining at multiple widely separated macro positions.
 
